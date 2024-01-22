@@ -1,0 +1,60 @@
+body {
+  background-color: #282c34;
+}
+
+
+#root {
+  width: 100%;
+}
+
+
+.App {
+  text-align: center;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.homeContainer {
+  padding-top: 32vh;
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.commit-card-title {
+  color: black;
+}
+
+li.filepath {
+  font-size: 13px;
+}
+
+.fullHeightContainer {
+  height: calc(100vh - 60px);
+  overflow-x: auto;
+}
+
+.card-title {
+  color: black;
+}
+
+input {
+  border: #282c34 solid;
+  border-radius: 10px;
+  font-size: 20px;
+  width: 200px;
+  height: 30px;
+}
