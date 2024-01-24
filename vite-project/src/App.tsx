@@ -70,7 +70,10 @@ import CreateGame from "./pages/Game/CreateGame/CreateGame";
 import MyGames from "./pages/Game/MyGames/MyGames";
 import JoinGame from "./pages/Game/JoinGame/JoinGame";
 import Partie from "./pages/Game/Partie/Partie";
+import { QueryClient, QueryClientProvider } from 'react-query';
 
+
+const queryClient = new QueryClient();
 // function AuthenticatedRoute({ path, element }: { path: string; element: React.ReactNode }) {
 
 
@@ -89,17 +92,17 @@ const App = () => {
         <Navigation />
         <div className="App">
           <Routes>
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<QueryClientProvider client={queryClient}><Register /></QueryClientProvider>} />
+            <Route path="/login" element={<QueryClientProvider client={queryClient}><Login /></QueryClientProvider>} />
 
-            <Route path="/create-game" element={<CreateGame />} />
+            <Route path="/create-game" element={<QueryClientProvider client={queryClient}><CreateGame /></QueryClientProvider>} />
 
-            <Route path="/my-games" element={<MyGames />} />
+            <Route path="/my-games" element={<QueryClientProvider client={queryClient}><MyGames /></QueryClientProvider>} />
 
-            <Route path="/join-game/:code" element={<JoinGame />} />
+            <Route path="/join-game/:code" element={<QueryClientProvider client={queryClient}><JoinGame /></QueryClientProvider>} />
 
-            <Route path="/partie" element={<Partie />} />
-            <Route path="/" element={<Home />} />
+            <Route path="/partie" element={<QueryClientProvider client={queryClient}><Partie /></QueryClientProvider>} />
+            <Route path="/" element={<QueryClientProvider client={queryClient}><Home /></QueryClientProvider>} />
           </Routes>
         </div>
       </AuthProvider>

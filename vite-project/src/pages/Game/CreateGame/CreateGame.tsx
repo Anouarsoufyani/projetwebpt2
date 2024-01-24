@@ -1,6 +1,8 @@
 
 import { useCreateGameMutation } from "../../../hooks/game.hooks";
 
+
+
 const CreateGame = () => {
 
   const createGameMutation = useCreateGameMutation()
@@ -19,7 +21,7 @@ const CreateGame = () => {
           Create game
         </button>
 
-        <p style={{ color: "white" }}>Your link to join the game is:  lohalhost:join/{createGameMutation.data?.data.code}</p>
+        <p style={{ color: "white" }}>Your link to join the game is:  localhost:join/{createGameMutation.data?.data.code}</p>
 
       </form>
     </div>

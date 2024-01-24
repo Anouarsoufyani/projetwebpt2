@@ -5,9 +5,8 @@ import uuid4 from "uuid4";
 import startGameRequestDto from "./dtos/startGameRequestDto";
 import { GameStatus } from "../../entities/GameStatus";
 import { CardDeck } from "../../services/CardDeck";
-import { chooseCard, createHandForAllPlayers, play } from "../../services/GameService";
-import { CardIdentifiers } from "../../services/CardType";
-import { Card } from "../../services/CardInterface";
+import { Jboeuf, createHandForAllPlayers } from "../../services/GameService";
+// import { Card } from "../../services/CardInterface";
 
 
 export class GameController {
@@ -30,7 +29,7 @@ export class GameController {
     const currentUser = req.user;
 
     const newGame = DI.em.create(Game, {
-      type: "Buffle",
+      type: "buffle",
       code: uuid4(),
       owner: currentUser,
       players: [currentUser],
@@ -102,12 +101,35 @@ export class GameController {
 
 
 
-    if (game && game?.owner?._id === currentUser._id && game.players.length >= 2 && game.players.length <= 10 && game.type == "bataille-simple") {
+    if (game && game?.owner?._id === currentUser._id && game.players.length >= 2 && game.players.length <= 10) {
       game.status = GameStatus.STARTED;
 
       const cardDeck = new CardDeck();
       const paquet = cardDeck.deck;
       const paquetMelange = cardDeck.shuffleDeck(paquet);
+      let miseEnJeu = [];
+
+      for (let i = 0; i < 4; i++) {
+        let card = paquetMelange.pop();
+        if (card !== undefined) {
+          miseEnJeu.push([card]);
+        }
+      }
+
+
+      console.log(Jboeuf(game, miseEnJeu));
+
+
+      // Fonction de comparaison pour trier les cartes
+      miseEnJeu.sort((a, b) => {
+        let cardA = a[0]; // Première carte de la sous-liste a
+        let cardB = b[0]; // Première carte de la sous-liste b
+
+        // Remplacer 'value' par la propriété réelle de vos objets Card
+        return cardA.identifiant - cardB.identifiant;
+      });
+
+
 
       // CREER MAIN ET DISTRIB CARTES
       createHandForAllPlayers(game.players, game, paquetMelange);
@@ -125,66 +147,55 @@ export class GameController {
       //     isUsable: true
       //   }];
 
-      let miseEnJeu: Card[] = [];
-      chooseCard(
-        {
-          identifiant: CardIdentifiers.AS,
-          symbole: "Coeur",
-          isUsable: true,
-          user: game.players[0]
-        }, miseEnJeu
-      );
 
-      chooseCard(
-        {
-          identifiant: CardIdentifiers.AS,
-          symbole: "Trefle",
-          isUsable: true,
-          user: game.players[1]
-        }, miseEnJeu
-      );
+      // chooseCard(
+      //   {
+      //     identifiant: 4,
+      //     isUsable: true,
+      //     user: game.players[0]
+      //   }, miseEnJeu
+      // );
 
-      const addScore = async (card: Card, players: User[]) => {
-        const user = await DI.userRepository.findOne({
-          _id: card.user?._id,
-        })
+      // chooseCard(
+      //   {
+      //     identifiant: 8,
+      //     isUsable: true,
+      //     user: game.players[1]
+      //   }, miseEnJeu
+      // );
 
-        let tabscore = [];
-        for (let i = 0; i < players.length; i++) {
-          tabscore.push({ id: players[i]._id, score: 0 });
-        }
+      // const addScore = async (card: Card, players: User[]) => {
+      //   const user = await DI.userRepository.findOne({
+      //     _id: card.user?._id,
+      //   })
+
+      //   let tabscore = [];
+      //   for (let i = 0; i < players.length; i++) {
+      //     tabscore.push({ id: players[i]._id, score: 0 });
+      //   }
 
 
-        for (let j = 0; j < players.length; j++) {
-          if (user) {
-            // DI.em.persistAndFlush(user);
+      //   for (let j = 0; j < players.length; j++) {
+      //     if (user) {
+      //       // DI.em.persistAndFlush(user);
 
-            if (tabscore[j].id == user?._id) {
-              tabscore[j].score++;
-            }
-            console.log(tabscore[j].id);
-            console.log(tabscore[j].score);
-          }
-        }
-        return tabscore;
-      }
+      //       if (tabscore[j].id == user?._id) {
+      //         tabscore[j].score++;
+      //       }
+      //       console.log(tabscore[j].id);
+      //       console.log(tabscore[j].score);
+      //     }
+      //   }
+      //   return tabscore;
+      // }
 
 
-      console.log(addScore(await play(miseEnJeu, game), game.players));
+      // console.log(addScore(await play(miseEnJeu, game), game.players));
 
 
 
 
-    } else if (game && game?.owner?._id === currentUser._id && game.players.length >= 2 && game.players.length <= 10 && game.type == "Buffle") {
-      const cardDeck = new CardDeck();
-      const paquet = cardDeck.deck;
-      const paquetMelange = cardDeck.shuffleDeck(paquet);
-
-      // CREER MAIN ET DISTRIB CARTES
-      createHandForAllPlayers(game.players, game, paquetMelange);
-      await DI.em.persistAndFlush(game);
-    }
-    else {
+    } else {
       return res.json("Joueurs insuffisants")
     }
 

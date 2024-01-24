@@ -26,13 +26,9 @@ const Partie: React.FC = () => {
         const messagesElement = document.getElementById("messages");
         if (messagesElement) {
             const newMessage = document.createElement("p");
-            if (newMessage.textContent == data) {
-                return 0;
-            } else {
-                newMessage.textContent = data;
-                messagesElement.appendChild(newMessage);
-                console.log("youhou");
-            }
+            newMessage.textContent = data;
+            messagesElement.appendChild(newMessage);
+            console.log("youhou");
         }
     });
     return (

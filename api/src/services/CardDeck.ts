@@ -2,50 +2,56 @@
 // import { User } from "../entities/User";
 // import { GameType } from "../entities/GameType";
 // import { Hand } from "../entities/Hand";
-import { CardIdentifiers } from "./CardType";
 import { Card } from "./CardInterface";
-import { CARD_POWERS } from "./CardPower";
 
 export class CardDeck {
 
     deck: Card[] = [];
 
-    static getCardPower = (card: Card) => {
-        return CARD_POWERS[card.identifiant]
-    }
+
 
     generationPaquet = () => {
 
         const paquet: Card[] = [];
 
-        Object.keys(CARD_POWERS).forEach(identifier => {
-            paquet.push({
-                identifiant: identifier as CardIdentifiers,
-                symbole: "Coeur",
-                isUsable: false,
-                user: undefined
-            })
-            paquet.push({
-                identifiant: identifier as CardIdentifiers,
-                symbole: "Carreau",
-                isUsable: false,
-                user: undefined
-            })
-            paquet.push({
-                identifiant: identifier as CardIdentifiers,
-                symbole: "Pique",
-                isUsable: false,
-                user: undefined
-            })
-            paquet.push({
-                identifiant: identifier as CardIdentifiers,
-                symbole: "Trefle",
-                isUsable: false,
-                user: undefined
-            })
-        })
+        for (let i = 0; i < 104; i++) {
+            if (i == 55) {
+                paquet.push({
+                    identifiant: i,
+                    isUsable: true,
+                    user: undefined,
+                    nbBoeuf: 7
+                },)
 
-        return paquet;
+            }
+
+            if ((i % 10) == 0) {
+                paquet.push({
+                    identifiant: i,
+                    isUsable: true,
+                    user: undefined,
+                    nbBoeuf: 3
+                },)
+            }
+            if ((i % 5) == 0) {
+                paquet.push({
+                    identifiant: i,
+                    isUsable: true,
+                    user: undefined,
+                    nbBoeuf: 2
+                },)
+            }
+            if ((i % 11) == 0) {
+                paquet.push({
+                    identifiant: i,
+                    isUsable: true,
+                    user: undefined,
+                    nbBoeuf: 5
+                },)
+            }
+        }
+
+        return paquet
     }
 
     shuffleDeck = (paquet: Card[]) => {
@@ -60,13 +66,13 @@ export class CardDeck {
         return paquet;
     }
 
-    getCard = (identifiant :CardIdentifiers, symbole: "Coeur" | "Trefle" | "Carreau" | "Pique") => {
-        for (let i = 0; i < this.deck.length; i++) {
-            if (identifiant == this.deck[i].identifiant && symbole == this.deck[i].symbole) {
-                return this.deck[i];
-            }
-        }
-    }
+    // getCard = (identifiant :number, symbole: "Coeur" | "Trefle" | "Carreau" | "Pique") => {
+    //     for (let i = 0; i < this.deck.length; i++) {
+    //         if (identifiant == this.deck[i].identifiant && symbole == this.deck[i].symbole) {
+    //             return this.deck[i];
+    //         }
+    //     }
+    // }
 
     // getCardByIndex = (i: number) => {
     //     return this.deck[i];

@@ -132,14 +132,14 @@ export const io = new Server(server, {
 
   io.on("connection", (socket) => {
 
-    // console.log("Un client s'est connecté");
+    console.log("Un client s'est connecté");
     // Exemple d'émission d'un événement depuis le serveur vers le client
-    // socket.emit("message", "Bienvenue sur le serveur !");
+    socket.emit("message", "Bienvenue sur le serveur !");
 
     // Exemple de réception d'un événement depuis le client
     socket.on("send_message", (data) => {
       console.log(`Message : ${JSON.stringify(data)}`)
-      io.emit("receive_message", data)
+      io.emit("receive_message", data);
     });
 
     socket.on("disconnect", () => {
