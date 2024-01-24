@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
-import { useGetMyGames } from "../../../hooks/game.hooks"
+import { useGetAllGames } from "../../../hooks/game.hooks"
 import { Link } from "react-router-dom";
 // import { io } from "socket.io-client";
 
 
-const MyGames = () => {
+const AllGames = () => {
 
-    const getMyGames = useGetMyGames()
+    const getAllGamesQuery = useGetAllGames()
 
-    const games = getMyGames.data?.data.games;
+    const games = getAllGamesQuery.data?.data.games;
 
 
     return (
         <>
-            {getMyGames.isLoading ? (
+            {getAllGamesQuery.isLoading ? (
                 <div>Loading</div>
             ) : (
                 <TableContainer component={Paper}>
@@ -22,18 +22,20 @@ const MyGames = () => {
                         <TableHead>
                             <TableRow>
                                 <TableCell align="left">Game Number</TableCell>
+                                <TableCell align="left">Owner</TableCell>
                                 <TableCell align="left">NbPlayers</TableCell>
                                 <TableCell align="left">Status</TableCell>
-                                <TableCell align="left">Start</TableCell>
+                                <TableCell align="left">Join</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {games.map((game: any) => (
                                 <TableRow>
                                     <TableCell align="left">{game.code}</TableCell>
+                                    <TableCell align="left">{game.owner}</TableCell>
                                     <TableCell align="left">{game.players.length}/10</TableCell>
                                     <TableCell align="left">{game.status}</TableCell>
-                                    <TableCell align="left"> <Link to={`/start-game/${game.code}`}>Start the game</Link></TableCell>
+                                    <TableCell align="left"> <Link to={`/join-game/${game.code}`}>Join the game</Link></TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -46,4 +48,4 @@ const MyGames = () => {
     )
 }
 
-export default MyGames
+export default AllGames

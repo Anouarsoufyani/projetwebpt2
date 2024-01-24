@@ -12,7 +12,7 @@ interface joinGameRequestDto {
     user: any; // type user
 }
 
-interface joinGameRequestDto {
+interface joinGameResponseDto {
     game: any;
 }
 
@@ -46,13 +46,17 @@ export const GameService = {
         return http.get(`/game`);
     },
 
+    getMyGames: async (): Promise<AxiosResponse<any>> => {
+        return http.get(`/game/my-games`);
+    },
+
     createGame: async (): Promise<AxiosResponse<gameResponseDto>> => {
         return http.post("/game");
     },
 
     joinGame: async (
         data: joinGameRequestDto
-    ): Promise<AxiosResponse<any>> => {
+    ): Promise<AxiosResponse<joinGameResponseDto>> => {
         return http.post(`/game/join`, data);
     },
 

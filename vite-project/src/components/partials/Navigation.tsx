@@ -18,7 +18,7 @@ const Navigation = () => {
           >
             Bataille
           </Typography>
-          {!token && !user ? (
+          {!token || !user ? (
             <>
               <Button
                 component={Link}
@@ -54,6 +54,14 @@ const Navigation = () => {
                 color="inherit"
               >
                 Join Game
+              </Button>
+              <Button
+                component={Link}
+                to="/all-games"
+                sx={{ m: 2 }}
+                color="inherit"
+              >
+                All Games
               </Button>
               <Button
                 component={Link}

@@ -67,10 +67,11 @@ import { AuthProvider } from "./hooks/useAuth";
 // import useAuth from "./hooks/useAuth2";
 
 import CreateGame from "./pages/Game/CreateGame/CreateGame";
-import MyGames from "./pages/Game/MyGames/MyGames";
+import AllGames from "./pages/Game/AllGames/AllGames";
 import JoinGame from "./pages/Game/JoinGame/JoinGame";
 import Partie from "./pages/Game/Partie/Partie";
 import { QueryClient, QueryClientProvider } from 'react-query';
+import MyGames from "./pages/Game/MyGames/MyGames";
 
 
 const queryClient = new QueryClient();
@@ -96,6 +97,8 @@ const App = () => {
             <Route path="/login" element={<QueryClientProvider client={queryClient}><Login /></QueryClientProvider>} />
 
             <Route path="/create-game" element={<QueryClientProvider client={queryClient}><CreateGame /></QueryClientProvider>} />
+
+            <Route path="/all-games" element={<QueryClientProvider client={queryClient}><AllGames /></QueryClientProvider>} />
 
             <Route path="/my-games" element={<QueryClientProvider client={queryClient}><MyGames /></QueryClientProvider>} />
 

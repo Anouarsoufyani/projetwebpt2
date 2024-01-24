@@ -10,10 +10,14 @@ const JoinGame = () => {
 
     const joinGameMutation = useJoinGameMutation()
 
-    const onSubmit = async (e: any) => {
+
+    const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await joinGameMutation.mutateAsync(e);
-    }
+        console.log("Form data before submission:", e); // Ajoutez cette ligne pour déboguer
+
+        // Utilisez directement le code de la partie extrait de l'URL
+        await joinGameMutation.mutateAsync({ gameCode: code });
+    };
 
     const { code } = useParams<any>();
 

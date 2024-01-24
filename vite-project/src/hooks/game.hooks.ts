@@ -17,6 +17,14 @@ export const useGetAllGames = () => {
 
 }
 
+export const useGetMyGames = () => {
+    return useQuery({
+        queryFn: () => { return GameService.getMyGames() },
+        queryKey: 'get-my-games'
+    })
+
+}
+
 export const useJoinGameMutation = () => {
     return useMutation({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -26,7 +26,7 @@ export class Game {
 
   @Property()
   type!: string;
-
+  
   @Enum({ default: GameStatus.UNSTARTED })
   status = GameStatus.UNSTARTED;
 

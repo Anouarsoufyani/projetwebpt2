@@ -6,6 +6,7 @@ import startGameRequestDto from "./dtos/startGameRequestDto";
 import { GameStatus } from "../../entities/GameStatus";
 import { CardDeck } from "../../services/CardDeck";
 import { Jboeuf, createHandForAllPlayers } from "../../services/GameService";
+import getMyGamesRequestDto from "./dtos/getMyGamesRequestDto";
 // import { Card } from "../../services/CardInterface";
 
 
@@ -20,9 +21,17 @@ export class GameController {
     return res.json({ games });
   };
 
+  static getMyGames = async (req: Request<getMyGamesRequestDto>, res: Response) => {
+    const currentUser = req.user;
+    console.log({USERGETGAMES : currentUser});
+    
 
+    const games = await DI.orm.em.find(Game, {
+      owner: currentUser,  // Assurez-vous que votre entité Game a une relation nommée 'owner' avec l'entité User
+    });
 
-
+    return res.json({ games });
+  };
 
 
   static createGame = async (req: Request, res: Response) => {

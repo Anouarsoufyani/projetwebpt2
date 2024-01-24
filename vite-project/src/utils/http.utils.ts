@@ -15,7 +15,7 @@ http.interceptors.request.use(
 );
 
 function isTokenExpiredError(errorResponse: any) {
-  return errorResponse.status === 401;
+  return errorResponse && errorResponse.status === 401;
 }
 
 http.interceptors.response.use(
