@@ -27,18 +27,28 @@ const Partie: React.FC = () => {
     return (
         <>
             <section id="game_container">
+                <div className="game">
 
+                </div>
+                <div className="hand_container">
+                    <div className="card"></div>
+                    <div className="card"></div>
+                    <div className="card"></div>
+                    <div className="card"></div>
+                    <div className="card"></div>
+                    <div className="card"></div>
+                </div>
             </section>
             <section id="chat">
                 <div id='messages'>
                     {messages.map((messageData, index) => (
-                        <p key={index}>
-                            <span className="message-owner">{messageData.username}:</span> {messageData.message}
+                        <p key={index} className={messageData.username === JSON.parse(localStorage.getItem('user') || '{}').username ? 'own-message' : ''}>
+                            <span><strong className="message-owner">{messageData.username}</strong> :</span> <span>{messageData.message}</span>
                         </p>
                     ))}
                 </div>
-                <form className='home__container' onSubmit={handleSubmit}>
-                    <h2 className='home__header'>Sign in to Open Chat</h2>
+                <form onSubmit={handleSubmit}>
+                    <hr />
                     <input
                         type='text'
                         minLength={6}
