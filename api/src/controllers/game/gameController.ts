@@ -23,8 +23,8 @@ export class GameController {
 
   static getMyGames = async (req: Request<getMyGamesRequestDto>, res: Response) => {
     const currentUser = req.user;
-    console.log({USERGETGAMES : currentUser});
-    
+    console.log({ USERGETGAMES: currentUser });
+
 
     const games = await DI.orm.em.find(Game, {
       owner: currentUser,  // Assurez-vous que votre entité Game a une relation nommée 'owner' avec l'entité User

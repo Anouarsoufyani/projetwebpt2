@@ -72,6 +72,7 @@ import JoinGame from "./pages/Game/JoinGame/JoinGame";
 import Partie from "./pages/Game/Partie/Partie";
 import { QueryClient, QueryClientProvider } from 'react-query';
 import MyGames from "./pages/Game/MyGames/MyGames";
+import StartGame from "./pages/Game/StartGame/StartGame";
 
 
 const queryClient = new QueryClient();
@@ -103,6 +104,8 @@ const App = () => {
             <Route path="/my-games" element={<QueryClientProvider client={queryClient}><MyGames /></QueryClientProvider>} />
 
             <Route path="/join-game/:code" element={<QueryClientProvider client={queryClient}><JoinGame /></QueryClientProvider>} />
+
+            <Route path="/start/:code" element={<QueryClientProvider client={queryClient}><StartGame /></QueryClientProvider>} />
 
             <Route path="/partie" element={<QueryClientProvider client={queryClient}><Partie /></QueryClientProvider>} />
             <Route path="/" element={<QueryClientProvider client={queryClient}><Home /></QueryClientProvider>} />

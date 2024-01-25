@@ -32,5 +32,13 @@ export const useJoinGameMutation = () => {
             return GameService.joinGame(game)
         },
     })
+}
 
+export const useStartGameMutation = () => {
+    return useMutation({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mutationFn: (game: any) => {
+            return GameService.startGame(game)
+        },
+    })
 }

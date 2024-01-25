@@ -21,7 +21,7 @@ const CreateGame = () => {
           Create game
         </button>
 
-        <p style={{ color: "white" }}>Your link to join the game is:  localhost:join/{createGameMutation.data?.data.code}</p>
+        <p style={{ color: "white" }}>Your link to join the game is:  http://localhost:5173/join-game/{createGameMutation.data?.data.code}</p>
 
       </form>
     </div>

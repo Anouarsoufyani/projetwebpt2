@@ -1,128 +1,58 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import { useState, useEffect } from "react";
-import { io } from "socket.io-client";
+import React, { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
+import './Partie.css';
 
 const Partie: React.FC = () => {
+    const socket = io('http://localhost:5000/');
+    const [message, setMessage] = useState('');
+    const [messages, setMessages] = useState<{ username: string; message: string }[]>([]);
 
-    const socket = io('http://localhost:5000/'); // Utilisez le même port que votre serveur
-    // const sendMessage = () => {
-
-    // }
-
-    // const navigate = useNavigate();
-    const [userName, setUserName] = useState('');
-
-    const handleSubmit = (e: any) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        localStorage.setItem('userName', userName);
-        socket.emit("send_message", userName)
-        // navigate('/chat');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        localStorage.setItem('Message', message);
+        socket.emit('send_message', { username: user.username, message });
     };
 
+    useEffect(() => {
+        socket.on('receive_message', (data) => {
+            setMessages((prevMessages) => [...prevMessages, data]);
+        });
 
-    socket.on("receive_message", (data) => {
-        const messagesElement = document.getElementById("messages");
-        if (messagesElement) {
-            const newMessage = document.createElement("p");
-            newMessage.textContent = data;
-            messagesElement.appendChild(newMessage);
-            console.log("youhou");
-        }
-    });
+        return () => {
+            socket.off('receive_message');
+        };
+    }, [socket]);
+
     return (
         <>
-            <div id='messages'>
+            <section id="game_container">
 
-            </div>
-            <form className="home__container" onSubmit={handleSubmit}>
-                <h2 className="home__header">Sign in to Open Chat</h2>
-                <label htmlFor="username">Username</label>
-                <input
-                    type="text"
-                    minLength={6}
-                    name="username"
-                    id="username"
-                    className="username__input"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                />
-                <button className="home__cta">SIGN IN</button>
-            </form>
+            </section>
+            <section id="chat">
+                <div id='messages'>
+                    {messages.map((messageData, index) => (
+                        <p key={index}>
+                            <span className="message-owner">{messageData.username}:</span> {messageData.message}
+                        </p>
+                    ))}
+                </div>
+                <form className='home__container' onSubmit={handleSubmit}>
+                    <h2 className='home__header'>Sign in to Open Chat</h2>
+                    <input
+                        type='text'
+                        minLength={6}
+                        name='username'
+                        id='username'
+                        className='username__input'
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                    />
+                    <button>Send</button>
+                </form>
+            </section>
         </>
     );
-
-
-
-    // socket.emit('joueur', games.owner);
-
-    // socket.on('mainDeCartes', (nouvelleMain) => {
-    //     console.log({ main: nouvelleMain });
-    // });
-
-    // return (
-    //     <div>
-    //         <h1>Chat de la partie</h1>
-    //         {/* <h2 style={{ color: "white" }}>{games.owner}</h2> */}
-    //         <input type="text" />
-    //         <button onClick={sendMessage}>Envoyer le message</button>
-    //     </div>
-    // );
 };
 
 export default Partie;
-
-
-// const Partie: React.FC = () => {
-//     const [mainDeCartes, setMainDeCartes] = useState<string[]>([]);
-//     const [message, setMessage] = useState<string>('');
-//     const socket = io('http://localhost:5000/game/start'); // Utilisez le même port que votre serveur
-
-//     useEffect(() => {
-//         // Écoutez l'événement 'mainDeCartes' émis par le serveur
-//         socket.on('mainDeCartes', (nouvelleMain: string[]) => {
-//             setMainDeCartes(nouvelleMain);
-//         });
-
-//         // Écoutez l'événement 'message' émis par le serveur
-//         socket.on('message', (data: string) => {
-//             setMessage(data);
-//         });
-
-//         // Nettoyez le socket lors du démontage du composant
-//         return () => {
-//             socket.disconnect();
-//         };
-//     }, [socket]);
-
-//     const genererOptions = () => {
-//         // Émettez un événement au serveur pour demander la nouvelle main
-//         socket.emit('demanderMainDeCartes');
-//     };
-
-//     return (
-//         <div>
-//             <h1>Page de la partie</h1>
-
-//             <label htmlFor="cartes">Choisissez vos cartes :</label>
-//             <select id="cartes" name="cartes" multiple>
-//                 {mainDeCartes.map((carte, index) => (
-//                     <option key={index} value={carte}>
-//                         {carte}
-//                     </option>
-//                 ))}
-//             </select>
-
-//             <button type="button" onClick={genererOptions}>
-//                 Générer Options
-//             </button>
-
-//             <div>
-//                 <p>Message du serveur : {message}</p>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default Partie;

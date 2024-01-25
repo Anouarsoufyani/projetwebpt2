@@ -54,6 +54,7 @@ export const createHand = async (player: User, game: Game, cards: Card[]) => {
 
     await DI.em.persistAndFlush(newHand);
 
+
     // const listeDeMain = newHand.cards;
     // io.on('connection', (socket: Socket) => {
     //     console.log("'Un client s'est connecté au serveur de jeu'");
@@ -85,6 +86,17 @@ export const createHand = async (player: User, game: Game, cards: Card[]) => {
     // }
 
 };
+
+
+
+export const getHand = async (game: Game, user: User) => {
+    const hand = await DI.orm.em.find(Hand, {
+        owner: user,
+        game: game  // Assurez-vous que votre entité Game a une relation nommée 'owner' avec l'entité User
+    });
+
+    return hand;
+}
 
 // creation de main pour chaque joueur
 export const createHandForAllPlayers = (players: User[], game: Game, paquet: Card[]) => {
