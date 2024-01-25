@@ -32,14 +32,6 @@ interface gameResponseDto {
 }
 
 
-// interface startGameRequestDto {
-//     gameCode: string;
-//     user: any; // type user
-// }
-
-
-
-
 
 export const GameService = {
     getAllGames: async (): Promise<AxiosResponse<any>> => {
@@ -48,6 +40,10 @@ export const GameService = {
 
     getMyGames: async (): Promise<AxiosResponse<any>> => {
         return http.get(`/game/my-games`);
+    },
+
+    getGame: async (code: string): Promise<AxiosResponse<any>> => {
+        return http.get(`/game/get-game/${code}`);
     },
 
     createGame: async (): Promise<AxiosResponse<gameResponseDto>> => {

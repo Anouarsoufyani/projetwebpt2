@@ -22,6 +22,12 @@ router.get(
   GameController.getMyGames
 );
 
+router.get(
+  "/get-game/:code",
+  passport.authenticate("jwt", { session: false }),
+  GameController.getGame
+);
+
 router.post(
   "/join",
   passport.authenticate("jwt", { session: false }),

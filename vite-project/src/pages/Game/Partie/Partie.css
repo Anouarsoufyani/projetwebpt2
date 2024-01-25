@@ -58,6 +58,7 @@ body {
     justify-content: space-around;
     align-items: center;
     overflow-x: auto;
+    font-size: medium;
 }
 
 .card {

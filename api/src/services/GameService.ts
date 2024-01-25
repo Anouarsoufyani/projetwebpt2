@@ -100,7 +100,7 @@ export const getHand = async (game: Game, user: User) => {
 
 // creation de main pour chaque joueur
 export const createHandForAllPlayers = (players: User[], game: Game, paquet: Card[]) => {
-    const nbDeCarteParJoueur = paquet.length / players.length;
+    const nbDeCarteParJoueur = 10;
     let compteur = 0;
     for (let j = 0; j < players.length; j++) {
 

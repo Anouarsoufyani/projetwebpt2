@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { DI } from "../../app";
+import { DI, io } from "../../app";
 import { Game, User } from "../../entities";
 import uuid4 from "uuid4";
 import startGameRequestDto from "./dtos/startGameRequestDto";
 import { GameStatus } from "../../entities/GameStatus";
 import { CardDeck } from "../../services/CardDeck";
-import { Jboeuf, createHandForAllPlayers } from "../../services/GameService";
+import { createHandForAllPlayers } from "../../services/GameService";
 import getMyGamesRequestDto from "./dtos/getMyGamesRequestDto";
 // import { Card } from "../../services/CardInterface";
 
@@ -19,6 +19,17 @@ export class GameController {
     });
 
     return res.json({ games });
+  };
+
+
+  static getGame = async (req: Request, res: Response) => {
+    const code = req.params.code;
+
+    const game = await DI.gameRepository.findOne({
+      code: code,
+    });
+
+    return res.json({ game });
   };
 
   static getMyGames = async (req: Request<getMyGamesRequestDto>, res: Response) => {
@@ -126,7 +137,7 @@ export class GameController {
       }
 
 
-      console.log(Jboeuf(game, miseEnJeu));
+      // console.log(Jboeuf(game, miseEnJeu));
 
 
       // Fonction de comparaison pour trier les cartes
@@ -143,6 +154,25 @@ export class GameController {
       // CREER MAIN ET DISTRIB CARTES
       createHandForAllPlayers(game.players, game, paquetMelange);
       await DI.em.persistAndFlush(game);
+
+
+      io.on("connection", (socket) => {
+
+        // Écoutez la demande de la main
+        socket.on("request_main", () => {
+          // Émettez la main uniquement en réponse à la demande
+          for (let i = 0; i < game.gameHands.length; i++) {
+            if (game.gameHands[i].owner == currentUser) {
+
+              socket.emit("main", { main: game.gameHands[i].cards });
+
+            }
+
+          }
+        });
+      });
+
+
 
       // const cardsTest : Card[] = [
       //   {

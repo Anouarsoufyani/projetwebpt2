@@ -1,15 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams } from "react-router-dom";
 import { useStartGameMutation } from "../../../hooks/game.hooks";
+import { useNavigate } from "react-router-dom";
+
 
 
 const StartGame = () => {
+
+    const navigate = useNavigate();
+
 
     //SI USER CONNECTE ET PAS PROPRIETAIRE DE LA PARTIE => RETURN JOIN BUTTON
     //SI USER CONNECTE ET PROPRIETAIRE DE LA PARTIE => RETURN JOIN BUTTON
 
     const startGameMutation = useStartGameMutation()
 
+    const { code } = useParams<any>();
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -17,9 +23,9 @@ const StartGame = () => {
 
         // Utilisez directement le code de la partie extrait de l'URL
         await startGameMutation.mutateAsync({ gameCode: code });
+        navigate(`/partie/${code}`);
     };
 
-    const { code } = useParams<any>();
 
     return (
         <div>

@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams } from "react-router-dom";
 import { useJoinGameMutation } from "../../../hooks/game.hooks";
-
+import { useNavigate } from "react-router-dom";
 
 const JoinGame = () => {
+
+    const navigate = useNavigate();
 
     //SI USER CONNECTE ET PAS PROPRIETAIRE DE LA PARTIE => RETURN JOIN BUTTON
     //SI USER CONNECTE ET PROPRIETAIRE DE LA PARTIE => RETURN JOIN BUTTON
@@ -17,6 +19,8 @@ const JoinGame = () => {
 
         // Utilisez directement le code de la partie extrait de l'URL
         await joinGameMutation.mutateAsync({ gameCode: code });
+        navigate(`/partie/${code}`);
+
     };
 
     const { code } = useParams<any>();

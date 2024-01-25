@@ -107,7 +107,7 @@ const App = () => {
 
             <Route path="/start/:code" element={<QueryClientProvider client={queryClient}><StartGame /></QueryClientProvider>} />
 
-            <Route path="/partie" element={<QueryClientProvider client={queryClient}><Partie /></QueryClientProvider>} />
+            <Route path="/partie/:code" element={<QueryClientProvider client={queryClient}><Partie /></QueryClientProvider>} />
             <Route path="/" element={<QueryClientProvider client={queryClient}><Home /></QueryClientProvider>} />
           </Routes>
         </div>
