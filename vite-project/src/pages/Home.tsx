@@ -1,17 +1,17 @@
 import { Card, Grid, Box, Container } from "@mui/material";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+// import { useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+// import useAuth from "../hooks/useAuth";
 
 const Home = () => {
-  const navigate = useNavigate();
-  const { token, user } = useAuth();
+  // const navigate = useNavigate();
+  // const { token, user } = useAuth();
 
-  useEffect(() => {
-    if (token && user) {
-      navigate("/");
-    }
-  });
+  // useEffect(() => {
+  //   if (token && user) {
+  //     navigate("/");
+  //   }
+  // });
 
   return (
     <Container maxWidth="lg">
@@ -21,7 +21,7 @@ const Home = () => {
             <Card sx={{ minWidth: 275, p: 10 }}>
               <Grid item xs={12}>
                 <Box sx={{ textAlign: "center" }}>
-                  <h4 className="mt-5">Welcome to Bataille</h4>
+                  <h4 className="mt-5">Welcome</h4>
                 </Box>
               </Grid>
             </Card>

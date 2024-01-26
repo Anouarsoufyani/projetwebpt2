@@ -7,8 +7,13 @@ const AllGames = () => {
     const getAllGamesQuery = useGetAllGames();
     const allGames = getAllGamesQuery.data?.data?.games;  // Ajoutez une vérification ici
 
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+
+    console.log(user.id);
+
     // Filtrer les jeux avec le statut "unstarted"
-    const unstartedGames = allGames ? allGames.filter((game: any) => game.status === "unstarted") : [];
+    const unstartedGames = allGames ? allGames.filter((game: any) => game.status === "unstarted" && game.owner != user.id) : [];
 
     return (
         <>

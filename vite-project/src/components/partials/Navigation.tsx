@@ -16,7 +16,7 @@ const Navigation = () => {
             variant="h6"
             sx={{ flexGrow: 1, textDecoration: "none" }}
           >
-            Bataille
+            Acceuil
           </Typography>
           {!token || !user ? (
             <>
@@ -62,14 +62,6 @@ const Navigation = () => {
                 color="inherit"
               >
                 My Games
-              </Button>
-              <Button
-                component={Link}
-                to="/partie"
-                sx={{ m: 2 }}
-                color="inherit"
-              >
-                Partie
               </Button>
               <Button
                 component={Link}
