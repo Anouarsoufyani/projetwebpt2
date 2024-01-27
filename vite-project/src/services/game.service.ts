@@ -42,6 +42,10 @@ export const GameService = {
         return http.get(`/game/my-games`);
     },
 
+    getMyOngoingGames: async (): Promise<AxiosResponse<any>> => {
+        return http.get(`/game/my-ongoing-games`);
+    },
+
     getGame: async (code: string): Promise<AxiosResponse<any>> => {
         return http.get(`/game/get-game/${code}`);
     },

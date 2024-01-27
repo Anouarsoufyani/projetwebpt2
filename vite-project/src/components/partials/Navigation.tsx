@@ -65,6 +65,14 @@ const Navigation = () => {
               </Button>
               <Button
                 component={Link}
+                to="/my-ongoing-games"
+                sx={{ m: 2 }}
+                color="inherit"
+              >
+                Ongoing Games
+              </Button>
+              <Button
+                component={Link}
                 to="/scores"
                 sx={{ m: 2 }}
                 color="inherit"
@@ -73,6 +81,14 @@ const Navigation = () => {
               </Button>
 
               <Button
+                sx={{ m: 2 }}
+                color="inherit"
+              >
+                Bienvenue {JSON.parse(user).username}
+              </Button>
+
+
+              < Button
                 onClick={() => {
                   logout();
                 }}
@@ -85,7 +101,7 @@ const Navigation = () => {
           )}
         </Toolbar>
       </AppBar>
-    </Box>
+    </Box >
   );
 };
 

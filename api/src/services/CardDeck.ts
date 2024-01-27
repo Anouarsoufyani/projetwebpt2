@@ -11,47 +11,49 @@ export class CardDeck {
 
 
     generationPaquet = () => {
-
         const paquet: Card[] = [];
 
-        for (let i = 1; i < 105; i++) {
-            if (i == 55) {
+        for (let i = 1; i <= 104; i++) { // Supposons que vous commencez par 1 et allez jusqu'à 104 inclus
+            if (i === 55) {
                 paquet.push({
                     identifiant: i,
                     isUsable: true,
                     user: undefined,
                     nbBoeuf: 7
-                },)
-
-            }
-
-            if ((i % 10) == 0) {
-                paquet.push({
-                    identifiant: i,
-                    isUsable: true,
-                    user: undefined,
-                    nbBoeuf: 3
-                },)
-            }
-            if ((i % 5) == 0) {
-                paquet.push({
-                    identifiant: i,
-                    isUsable: true,
-                    user: undefined,
-                    nbBoeuf: 2
-                },)
-            }
-            if ((i % 11) == 0) {
+                });
+            } else if (i % 11 === 0) {
                 paquet.push({
                     identifiant: i,
                     isUsable: true,
                     user: undefined,
                     nbBoeuf: 5
-                },)
+                });
+            } else if (i % 10 === 0) {
+                paquet.push({
+                    identifiant: i,
+                    isUsable: true,
+                    user: undefined,
+                    nbBoeuf: 3
+                });
+            } else if (i % 5 === 0) {
+                paquet.push({
+                    identifiant: i,
+                    isUsable: true,
+                    user: undefined,
+                    nbBoeuf: 2
+                });
+            } else {
+                // Ajouter une carte standard si aucune des autres conditions n'est remplie
+                paquet.push({
+                    identifiant: i,
+                    isUsable: true,
+                    user: undefined,
+                    nbBoeuf: 1 // ou une autre valeur appropriée pour nbBoeuf
+                });
             }
         }
 
-        return paquet
+        return paquet;
     }
 
     shuffleDeck = (paquet: Card[]) => {

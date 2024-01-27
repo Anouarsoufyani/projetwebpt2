@@ -23,6 +23,12 @@ router.get(
 );
 
 router.get(
+  "/my-ongoing-games",
+  passport.authenticate("jwt", { session: false }),
+  GameController.getMyOngoingGames
+);
+
+router.get(
   "/get-game/:code",
   passport.authenticate("jwt", { session: false }),
   GameController.getGame

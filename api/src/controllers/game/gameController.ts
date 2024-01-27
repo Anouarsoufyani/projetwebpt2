@@ -36,12 +36,39 @@ export class GameController {
 
   static getMyGames = async (req: Request<getMyGamesRequestDto>, res: Response) => {
     const currentUser = req.user;
-    console.log({ USERGETGAMES: currentUser });
 
 
     const games = await DI.orm.em.find(Game, {
       owner: currentUser,  // Assurez-vous que votre entité Game a une relation nommée 'owner' avec l'entité User
     });
+
+    return res.json({ games });
+  };
+
+  static getMyOngoingGames = async (req: Request<getMyGamesRequestDto>, res: Response) => {
+    const currentUser = req.user;
+    console.log(currentUser);
+
+
+
+    const buffleGames = await DI.orm.em.find(Game, {
+      type: "buffle"
+    });
+
+    let games: any[] = [];
+
+    buffleGames.forEach(game => {
+      console.log(game.players);
+      for (const player of game.players) {
+        console.log(player);
+
+        if (player == currentUser) {
+          games.push(game);
+        }
+      }
+
+    });
+
 
     return res.json({ games });
   };
@@ -138,7 +165,7 @@ export class GameController {
       let nbJoueursConnectes: number = 0;
       io.on("connection", (socket) => {
         nbJoueursConnectes++;
-        console.log(nbJoueursConnectes);
+        socket.emit("nbJoueurs", nbJoueursConnectes);
 
         // Écoutez la demande de la main
         socket.on("request_main", () => {
@@ -147,12 +174,14 @@ export class GameController {
           socket.emit("main", { main: game.gameHands });
         });
 
+        io.emit("miseEnJeu", miseEnJeu);
+
         socket.on("sendCard", (data) => {
           console.log({ CardSent: data });
-          cartes.push(data);
+          cartes.push(data.card);
           if (cartes.length == nbJoueursConnectes) {
             console.log(Jboeuf(game, miseEnJeu, cartes));
-
+            io.emit("miseEnJeu", miseEnJeu);
           }
         })
 
@@ -174,7 +203,10 @@ export class GameController {
           } catch (error) {
             console.error("Erreur lors de la mise à jour de la main :", error);
           }
+        });
 
+        socket.on("disconnect", () => {
+          nbJoueursConnectes--;
         });
       });
       // const cardsTest : Card[] = [

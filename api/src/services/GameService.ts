@@ -1,4 +1,4 @@
-import { DI } from "../app";
+import { DI, io } from "../app";
 import { Game, Hand, User } from "../entities";
 // import { GameStatus } from "../entities/GameStatus";
 import { Card } from "./CardInterface";
@@ -100,7 +100,7 @@ export const getHand = async (game: Game, user: User) => {
 
 // creation de main pour chaque joueur
 export const createHandForAllPlayers = (players: User[], game: Game, paquet: Card[]) => {
-    const nbDeCarteParJoueur = paquet.length / players.length;
+    const nbDeCarteParJoueur = 10;
     let compteur = 0;
     for (let j = 0; j < players.length; j++) {
 
@@ -401,7 +401,6 @@ function minEcart(ecart1: number, ecart2: number, ecart3: number, ecart4: number
 export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) => {
 
 
-
     // for (let i = 0; i < game.players.length; i++) {// io.on()
     // let j = Math.floor(Math.random() * 101);
     // chooseCard({
@@ -443,6 +442,7 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
 
                             if (user && user.score) {
                                 user.score += miseEnJeu[i][m].nbBoeuf;
+                                await DI.em.persistAndFlush(game);
                                 miseEnJeu[i].pop()
                             }
 
@@ -452,6 +452,8 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
                 miseEnJeu[i].push(cartes[0]);
                 cartes.splice(0, 1);
                 i++;
+                io.emit("miseEnJeu", miseEnJeu);
+
                 console.log("MJ fin b", miseEnJeu);
                 break;
             }
@@ -461,7 +463,11 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
 
             // carte inferieur a la ligne correspondante
             else if (ecartL1 < 0 && ecartL2 < 0 && ecartL3 < 0 && ecartL4 < 0) {//envoie d un socket pour avertir l utilisateur qu il doit rentrer une ligne a prendre parmi les 4(input)
-                let id = 3; //recupere l id de la ligne qu il veut prendre entre la 1ere ligne et la 4eme
+                let id = 0; //recupere l id de la ligne qu il veut prendre entre la 1ere ligne et la 4eme
+                // io.emit("doitChoisir", "veuillez choisir une ligne");
+                // io.on("choixLigne", data => {
+                //     id = data;
+                // })
 
                 for (let m = miseEnJeu[id].length - 1; m >= 0; m--) {
                     if (cartes[0].user != undefined) {
@@ -470,6 +476,7 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
                         })
                         if (user && user.score) {
                             user.score += miseEnJeu[id][m].nbBoeuf;
+                            await DI.em.persistAndFlush(game);
                         }
                     }
                     miseEnJeu[id].pop()
@@ -478,6 +485,8 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
                 miseEnJeu[id].push(cartes[0]);
                 cartes.splice(0, 1);
                 i++;
+                io.emit("miseEnJeu", miseEnJeu);
+
                 console.log("MJ fin b", miseEnJeu);
                 break;
             }
@@ -509,12 +518,3 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
     //}
 
 }
-
-/* while ((ecartid)==(minEcart(ecartL1,ecartL2,ecartL3,ecartL4))){
-                    console.log("MJ avant",miseEnJeu[i]);
-                    miseEnJeu[i].push(cartes[0]);
-                    console.log("MJ apres",miseEnJeu[i]);
-                    console.log("cartes avant",cartes);
-                    cartes.splice(0,1);
-                    console.log("carte apres",cartes);
-                 } */

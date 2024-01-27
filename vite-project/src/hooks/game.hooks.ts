@@ -22,7 +22,13 @@ export const useGetMyGames = () => {
         queryFn: () => { return GameService.getMyGames() },
         queryKey: 'get-my-games'
     })
+}
 
+export const useGetMyOngoingGames = () => {
+    return useQuery({
+        queryFn: () => { return GameService.getMyOngoingGames() },
+        queryKey: 'get-my-ongoing-games'
+    })
 }
 
 // export const useGetGame = () => {

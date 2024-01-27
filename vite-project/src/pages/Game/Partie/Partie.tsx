@@ -11,6 +11,9 @@ const Partie: React.FC = () => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState<{ username: string; message: string }[]>([]);
     const [main, setMain] = useState<any>({ cards: [] });
+    const [miseEnJeu, setMiseEnJeu] = useState<any>();
+    const [nbJoueurs, setNbJoueurs] = useState<any>();
+    const [generated, setGenerated] = useState<any>(false);
 
 
 
@@ -24,17 +27,29 @@ const Partie: React.FC = () => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         localStorage.setItem('Message', message);
         socket.emit('send_message', { username: user.username, message });
-        if (inputRef.current) {
-            inputRef.current.value = '';  // Réinitialise la valeur de l'input à une chaîne vide
-        }
+        setMessage('');  // Met à jour l'état pour vider l'input
     };
+
+    socket.on("nbJoueurs", data => {
+        setNbJoueurs(data);
+        console.log(data);
+
+    });
+
+
+
+
+    socket.on("miseEnJeu", data => {
+        setMiseEnJeu(data);
+        console.log(miseEnJeu);
+
+    })
 
 
 
     useEffect(() => {
         socket.on('receive_message', (data) => {
             setMessages((prevMessages) => [...prevMessages, data]);
-            setMessage('');  // Met à jour l'état pour vider l'input
         });
 
         return () => {
@@ -48,7 +63,7 @@ const Partie: React.FC = () => {
         socket.emit("request_main");
 
         const handleMainUpdate = (data: any) => {
-            console.log(data);
+            console.log({ data: data });
 
             console.log('Main reçue:', data.main[0].owner);
             const mainUser = data.main.filter((item: any) => item.owner == userId)
@@ -66,7 +81,14 @@ const Partie: React.FC = () => {
 
     // Utilisez un autre useEffect pour observer les changements dans `main` et émettre l'événement 'updateHand'
     useEffect(() => {
-        if (main && main.cards.length > 0) {
+        if (main && generated) {
+            const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
+
+
+            socket.emit("updateHand", { hand: main, userId: userId });
+            console.log({ updatedHand: main });
+        }
+        else if (main && main.cards.length > 0) {
             const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
 
 
@@ -78,6 +100,8 @@ const Partie: React.FC = () => {
     }, [main]);
 
     const submitCard = (card: any) => {
+
+        setGenerated(true);
         console.log({ card: card });
 
         socket.emit('sendCard', { card });
@@ -99,38 +123,20 @@ const Partie: React.FC = () => {
     return (
         <>
             <section id="game_container">
+                <span>Nombre de joueurs : {nbJoueurs}</span>
                 <div className="game">
                     <div className="cartesPosees"></div>
                     {/* JEU */}
                     <div id='miseEnJeu'>
-                        <div className="listes">
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                        </div>
-                        <div className="listes">
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                        </div>
-                        <div className="listes">
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                        </div>
-                        <div className="listes">
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                            <div className="card"></div>
-                        </div>
+                        {miseEnJeu ? (miseEnJeu.map((liste: any, index: any) => (
+                            <div key={index} className="listes">
+                                {liste.map((carte: any, carteIndex: any) => (
+                                    <div key={carteIndex} className="card">
+                                        <img className="images" src={`/cards/${carte.identifiant}.svg`} alt={`Card ${carte.identifiant}`} />
+                                    </div>
+                                ))}
+                            </div>
+                        ))) : (<span>pas de miseEnJeu</span>)}
                     </div>
 
                 </div>
