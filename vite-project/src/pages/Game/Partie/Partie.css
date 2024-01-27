@@ -18,12 +18,11 @@ body {
     border-bottom: 2px solid white;
     border-top: 2px solid white;
     border-radius: 30px 0 0 30px;
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(0, 0, 0, 0.4);
 }
 
 #messages {
-    max-height: 50vh;
-    min-height: 25vh;
+    min-height: 80vh;
     overflow-y: auto;
     width: 80%;
     border: 1px solid black;
@@ -47,22 +46,54 @@ body {
 .game {
     width: 100%;
     height: 80vh;
-    border: 1px solid;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
 }
 
 .hand_container {
-    width: 100%;
+    width: 80%;
     height: 20vh;
-    border: 1px solid;
     display: flex;
     justify-content: space-around;
     align-items: center;
     overflow-x: auto;
     font-size: medium;
+    border-radius: 20px;
+    background-image: linear-gradient(to top, #0ba360 0%, #3cba92 100%);
 }
 
 .card {
     height: 90%;
     width: 10%;
     border: 1px solid;
+    border-radius: 10px;
+}
+
+#miseEnJeu{
+    height: 100%;
+    width: 80%;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.listes{
+    width: 100%;
+    height: 25%;
+    border-top: 1px solid;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row;
+}
+
+
+.images{
+    height: 100%;
+    width: 100%;
 }

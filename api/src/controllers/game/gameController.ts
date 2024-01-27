@@ -7,6 +7,7 @@ import { GameStatus } from "../../entities/GameStatus";
 import { CardDeck } from "../../services/CardDeck";
 import { createHandForAllPlayers } from "../../services/GameService";
 import getMyGamesRequestDto from "./dtos/getMyGamesRequestDto";
+import { ObjectId } from "@mikro-orm/mongodb";
 // import { Card } from "../../services/CardInterface";
 
 
@@ -64,20 +65,10 @@ export class GameController {
 
   static joinGame = async (req: Request, res: Response) => {
     const currentUser = req.user as User; // type correctly
-    console.log("current");
-
-    // console.log(currentUser);
-
 
     const userEntity = await DI.userRepository.findOne({
       _id: currentUser._id
     })
-    // console.log("entity");
-
-    // console.log(userEntity);
-
-
-    // console.log(req.body);
 
     const game = await DI.gameRepository.findOne({
 
@@ -107,19 +98,6 @@ export class GameController {
       owner: currentUser,
       code: req.body.gameCode
     })
-
-    //   const user = await DI.userRepository.findOne({
-    //     _id: game?.players[0]._id,
-    // })
-
-    // console.log({playerTest : game?.players[0]});
-    // console.log({playerTestUser : user});
-    // console.log(game?.players[0] == user);
-    // console.log({ownerHand : game?.gameHands[0].owner});
-
-    // console.log(game?.gameHands[0].owner == user);
-
-
 
     if (game && game?.owner?._id === currentUser._id && game.players.length >= 2 && game.players.length <= 10) {
       game.status = GameStatus.STARTED;
@@ -160,20 +138,40 @@ export class GameController {
 
         // Écoutez la demande de la main
         socket.on("request_main", () => {
-          // Émettez la main uniquement en réponse à la demande
-          for (let i = 0; i < game.gameHands.length; i++) {
-            if (game.gameHands[i].owner == currentUser) {
+          // Émettez la main uniquement en réponse à la demand
 
-              socket.emit("main", { main: game.gameHands[i].cards });
+          socket.emit("main", { main: game.gameHands });
+        });
 
+        socket.on("sendCard", (data) => {
+          console.log({ CardSent: data });
+
+        })
+
+        socket.on("updateHand", async (data) => {
+          try {
+            const userEntity = await DI.userRepository.findOne({
+              _id: new ObjectId(data.userId)
+            });
+
+            for (const hand of game.gameHands) {
+              if (hand.owner?._id && userEntity?._id && hand.owner._id.equals(userEntity._id)) {
+                console.log("Les cartes avant  : ", hand.cards);
+                hand.cards = data.hand.cards;
+                console.log("Les cartes après  : ", hand.cards);
+                await DI.em.persistAndFlush(game);  // Utilisez persist au lieu de persistAndFlush pour éviter la modification de la structure
+                console.log("GAMEHANDS", game.gameHands);
+                console.log("HAND", hand);
+                // Vous pouvez utiliser flush à la fin pour appliquer les modifications à la base de données
+                // await DI.em.flush();
+              }
             }
-
+          } catch (error) {
+            console.error("Erreur lors de la mise à jour de la main :", error);
           }
+
         });
       });
-
-
-
       // const cardsTest : Card[] = [
       //   {
       //     identifiant: CardIdentifiers.AS,
@@ -237,15 +235,6 @@ export class GameController {
     } else {
       return res.json("Joueurs insuffisants")
     }
-
-
-
-    // if (game && userEntity) {
-    //   game.players = [...game.players, userEntity]
-    //   await DI.em.persistAndFlush(game);
-    // } else {
-    //   /// handle error
-    // }
 
     return res.json(game);
 

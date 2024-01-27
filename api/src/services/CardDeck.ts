@@ -14,7 +14,7 @@ export class CardDeck {
 
         const paquet: Card[] = [];
 
-        for (let i = 0; i < 104; i++) {
+        for (let i = 1; i < 105; i++) {
             if (i == 55) {
                 paquet.push({
                     identifiant: i,

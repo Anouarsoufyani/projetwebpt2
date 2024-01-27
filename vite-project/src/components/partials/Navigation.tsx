@@ -16,7 +16,7 @@ const Navigation = () => {
             variant="h6"
             sx={{ flexGrow: 1, textDecoration: "none" }}
           >
-            Acceuil
+            Accueil
           </Typography>
           {!token || !user ? (
             <>

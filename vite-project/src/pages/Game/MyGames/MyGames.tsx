@@ -34,7 +34,13 @@ const MyGames = () => {
                                     <TableCell align="left">{game.code}</TableCell>
                                     <TableCell align="left">{game.players.length}/10</TableCell>
                                     <TableCell align="left">{game.status}</TableCell>
-                                    <TableCell align="left"> <Link to={`/start/${game.code}`}>Start the game</Link></TableCell>
+                                    {game.players.length > 1 ? (
+                                        <TableCell align="left">
+                                            <Link to={`/start/${game.code}`}>Start the game</Link>
+                                        </TableCell>
+                                    ) : (
+                                        <TableCell align="left">Il n'y a pas assez de joueurs dans la partie</TableCell>
+                                    ) }
                                 </TableRow>
                             ))}
                         </TableBody>
