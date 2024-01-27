@@ -71,7 +71,15 @@ body {
     border-radius: 10px;
 }
 
-#miseEnJeu{
+.cardInhand {
+    height: 90%;
+    width: 10%;
+    border: 1px solid;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+#miseEnJeu {
     height: 100%;
     width: 80%;
     display: flex;
@@ -82,7 +90,7 @@ body {
     background: rgba(0, 0, 0, 0.3);
 }
 
-.listes{
+.listes {
     width: 100%;
     height: 25%;
     border-top: 1px solid;
@@ -93,7 +101,7 @@ body {
 }
 
 
-.images{
+.images {
     height: 100%;
     width: 100%;
 }

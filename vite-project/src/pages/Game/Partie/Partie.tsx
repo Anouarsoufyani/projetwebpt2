@@ -92,49 +92,6 @@ const Partie: React.FC = () => {
     };
 
 
-    // useEffect(() => {
-    //     const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
-
-    //     // Émettez la demande de la main lorsque le composant est monté
-    //     socket.emit("request_main");
-
-    //     // Écoutez la réponse de la main
-    //     socket.on('main', (data) => {
-    //         console.log('Main reçue:', data.main[0].owner);
-    //         const mainUser = data.main.filter((item : any) => item.owner == userId)
-
-    //         setMain(mainUser[0].cards);
-
-    //     });
-
-    //     return () => {
-    //         // Retirez l'écouteur lors du démontage du composant
-    //         socket.off('main');
-    //     };
-    // }, []);
-
-    // const submitCard = (card: any) => {
-    //     console.log({ card: card });
-
-    //     // Émettez la carte au serveur
-    //     socket.emit('sendCard', { card });
-
-    //     // Mettez à jour la liste main en excluant la carte sur laquelle vous avez cliqué
-    //     setMain((prevMain) => prevMain.filter((c) => c !== card));
-
-    //     // Utilisez la valeur passée par la fonction de rappel de setMain
-    //     setMain((updatedMain) => {
-    //         // Maintenant, console.log(updatedMain) devrait afficher la valeur mise à jour
-    //         console.log(updatedMain);
-
-    //         // Émettre l'événement 'updateHand' avec la valeur mise à jour
-    //         socket.emit("updateHand", updatedMain);
-
-    //         // Retournez la nouvelle valeur de main
-    //         return updatedMain;
-    //     });
-    // };
-
 
 
 
@@ -182,8 +139,6 @@ const Partie: React.FC = () => {
                     {main.cards.map((card: any, index: number) => (
                         <div key={index} className="card cardInHand" onClick={() => submitCard(card)}>
                             <img className="images" src={`/cards/${card.identifiant}.svg`} alt={`Card ${card.identifiant}`} />
-                            <p>Identifiant: {card.identifiant}</p>
-                            <p>Boeuf: {card.nbBoeuf}</p>
                         </div>
                     ))}
                 </div>

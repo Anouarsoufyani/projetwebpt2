@@ -100,7 +100,7 @@ export const getHand = async (game: Game, user: User) => {
 
 // creation de main pour chaque joueur
 export const createHandForAllPlayers = (players: User[], game: Game, paquet: Card[]) => {
-    const nbDeCarteParJoueur = 10;
+    const nbDeCarteParJoueur = paquet.length / players.length;
     let compteur = 0;
     for (let j = 0; j < players.length; j++) {
 
@@ -373,90 +373,118 @@ const trie = (cards: Card[]) => {
     });
 }
 
-export const Jboeuf = async (game: Game, miseEnJeu: Card[][]) => {
-    let cartes: Card[] = []
 
-    for (let i = 0; i < game.players.length; i++) {// io.on()
-        let j = Math.floor(Math.random() * 101);
-        chooseCard({
-            identifiant: j,
-            isUsable: true,
-            user: game.players[i],
-            nbBoeuf: 3
-        }, cartes);
+
+// function enleverElement(cards: Card[], index: number){
+//     // Vérifie si l'index est dans la plage de la liste
+//     if (index < 0 || index >= cards.length) {
+//         console.error("Index hors de portée");
+//         return cards;
+//     }
+
+// }
+
+function minEcart(ecart1: number, ecart2: number, ecart3: number, ecart4: number): number | null {
+    const ecarts: number[] = [ecart1, ecart2, ecart3, ecart4];
+    const ecartsPositifs: number[] = ecarts.filter(ecart => ecart >= 0);
+
+    if (ecartsPositifs.length === 0) {
+        return null; // Aucun écart positif trouvé
     }
 
+    return Math.min(...ecartsPositifs);
+}
 
-    while (game.gameHands != null) {
 
-        //des que l utilisateur a envoyer une carte la mettre dans la liste cartes     
+
+
+export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) => {
+
+
+
+    // for (let i = 0; i < game.players.length; i++) {// io.on()
+    // let j = Math.floor(Math.random() * 101);
+    // chooseCard({
+    // identifiant: j,
+    // isUsable: true,
+    // user: game.players[i],
+    // nbBoeuf: 3
+    // }, cartes);
+    // }
+    while (cartes.length > 0) {
+
+        //des que l utilisateur a envoyer une carte la mettre dans la liste cartes 
+
+        console.log("MJ debut b", miseEnJeu);
 
 
         trie(cartes);
         for (let i = 0; i < miseEnJeu.length; i++) {
-            for (let j = 0; j < miseEnJeu[i].length; j++) {
-                for (let k = 0; k < cartes.length; k++) {
 
-                    //traite les cas de la carte qui est place entre la 1ere et la 3eme ligne carte comprise dans l'intervalle 
-                    if (i < 3 && miseEnJeu[i][miseEnJeu.length - 1] < cartes[i] && cartes[i] < miseEnJeu[i + 1][miseEnJeu.length - 1]) {
-                        if (miseEnJeu[i].length == 5) {
-                            for (let m = miseEnJeu[i].length - 1; m > 0; m--) {
-                                if (cartes[k].user != undefined) {
-                                    const user = await DI.userRepository.findOne({
-                                        _id: cartes[k].user?._id
-                                    })
 
-                                    if (user && user.score) {
-                                        user.score += miseEnJeu[i][m].nbBoeuf;
-                                        miseEnJeu[i].pop()
-                                    }
-                                }
+            let ecartL1 = cartes[0].identifiant - miseEnJeu[0][miseEnJeu[0].length - 1].identifiant
+            let ecartL2 = cartes[0].identifiant - miseEnJeu[1][miseEnJeu[1].length - 1].identifiant
+            let ecartL3 = cartes[0].identifiant - miseEnJeu[2][miseEnJeu[2].length - 1].identifiant
+            let ecartL4 = cartes[0].identifiant - miseEnJeu[3][miseEnJeu[3].length - 1].identifiant
+
+            let ecartid = cartes[0].identifiant - miseEnJeu[i][miseEnJeu[i].length - 1].identifiant
+
+            //traite les cas de la carte qui est place entre la 1ere et la 3eme ligne carte comprise dans l'intervalle 
+
+
+            if ((miseEnJeu[i][miseEnJeu[i].length - 1].identifiant < cartes[0].identifiant) && (ecartid) == (minEcart(ecartL1, ecartL2, ecartL3, ecartL4))) {
+
+                if (miseEnJeu[i].length == 5) {
+                    for (let m = miseEnJeu[i].length - 1; m >= 0; m--) {
+                        if (cartes[0].user != undefined) {
+                            const user = await DI.userRepository.findOne({
+                                _id: cartes[0].user?._id
+                            })
+
+                            if (user && user.score) {
+                                user.score += miseEnJeu[i][m].nbBoeuf;
+                                miseEnJeu[i].pop()
                             }
+
                         }
-                        miseEnJeu[i].push(cartes[k]);
                     }
-
-                    //traite les cas de la carte qui est place a la 4eme ligne carte superieur a la carte la plus a droite
-                    else if (i == 3 && miseEnJeu[i][miseEnJeu.length - 1] < cartes[i] && cartes[i] < miseEnJeu[i + 1][miseEnJeu.length - 1]) {
-                        if (miseEnJeu[i].length == 5) {
-                            for (let m = miseEnJeu[i].length - 1; m > 0; m--) {
-                                if (cartes[k].user != undefined) {
-                                    const user = await DI.userRepository.findOne({
-                                        _id: cartes[k].user?._id
-                                    })
-
-                                    if (user && user.score) {
-                                        user.score += miseEnJeu[i][m].nbBoeuf;
-                                        miseEnJeu[i].pop()
-                                    }
-                                }
-                            }
-                        }
-                        miseEnJeu[i].push(cartes[k]);
-                    }
-
-
-                    // carte inferieur a la ligne correspondante
-                    else {//envoie d un socket pour avertir l utilisateur qu il doit rentrer une ligne a prendre parmi les 4(input)
-                        let id = 3; //recupere l id de la ligne qu il veut prendre entre la 1ere ligne et la 4eme
-                        for (let m = miseEnJeu[id].length - 1; m > 0; m--) {
-                            if (cartes[k].user != undefined) {
-                                const user = await DI.userRepository.findOne({
-                                    _id: cartes[k].user?._id
-                                })
-
-                                if (user && user.score) {
-                                    user.score += miseEnJeu[i][m].nbBoeuf;
-                                    miseEnJeu[i].pop()
-                                }
-                            }
-                        }
-                        miseEnJeu[i].push(cartes[k]);
-                    }
-
                 }
+                miseEnJeu[i].push(cartes[0]);
+                cartes.splice(0, 1);
+                i++;
+                console.log("MJ fin b", miseEnJeu);
+                break;
             }
+
+
+
+
+            // carte inferieur a la ligne correspondante
+            else if (ecartL1 < 0 && ecartL2 < 0 && ecartL3 < 0 && ecartL4 < 0) {//envoie d un socket pour avertir l utilisateur qu il doit rentrer une ligne a prendre parmi les 4(input)
+                let id = 3; //recupere l id de la ligne qu il veut prendre entre la 1ere ligne et la 4eme
+
+                for (let m = miseEnJeu[id].length - 1; m >= 0; m--) {
+                    if (cartes[0].user != undefined) {
+                        const user = await DI.userRepository.findOne({
+                            _id: cartes[0].user?._id
+                        })
+                        if (user && user.score) {
+                            user.score += miseEnJeu[id][m].nbBoeuf;
+                        }
+                    }
+                    miseEnJeu[id].pop()
+                }
+
+                miseEnJeu[id].push(cartes[0]);
+                cartes.splice(0, 1);
+                i++;
+                console.log("MJ fin b", miseEnJeu);
+                break;
+            }
+
         }
+
+
     }
 
     let min = game.players[0]
@@ -468,4 +496,25 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][]) => {
     }
 
     return min;
+
+    // [ { identifiant: 0, isUsable: true, user: undefined, nbBoeuf: 2 } ],
+    // [ { identifiant: 15, isUsable: true, user: undefined, nbBoeuf: 2 } , {}],
+    // [ { identifiant: 30, isUsable: true, user: undefined, nbBoeuf: 3 } ],
+    // [ { identifiant: 70, isUsable: true, user: undefined, nbBoeuf: 3 } ]
+
+    // id carte = 25 
+
+    //if(user.score>66){
+    //break
+    //}
+
 }
+
+/* while ((ecartid)==(minEcart(ecartL1,ecartL2,ecartL3,ecartL4))){
+                    console.log("MJ avant",miseEnJeu[i]);
+                    miseEnJeu[i].push(cartes[0]);
+                    console.log("MJ apres",miseEnJeu[i]);
+                    console.log("cartes avant",cartes);
+                    cartes.splice(0,1);
+                    console.log("carte apres",cartes);
+                 } */

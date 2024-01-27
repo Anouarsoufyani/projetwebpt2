@@ -5,9 +5,10 @@ import uuid4 from "uuid4";
 import startGameRequestDto from "./dtos/startGameRequestDto";
 import { GameStatus } from "../../entities/GameStatus";
 import { CardDeck } from "../../services/CardDeck";
-import { createHandForAllPlayers } from "../../services/GameService";
+import { Jboeuf, createHandForAllPlayers } from "../../services/GameService";
 import getMyGamesRequestDto from "./dtos/getMyGamesRequestDto";
 import { ObjectId } from "@mikro-orm/mongodb";
+import { Card } from "../../services/CardInterface";
 // import { Card } from "../../services/CardInterface";
 
 
@@ -105,7 +106,7 @@ export class GameController {
       const cardDeck = new CardDeck();
       const paquet = cardDeck.deck;
       const paquetMelange = cardDeck.shuffleDeck(paquet);
-      let miseEnJeu = [];
+      let miseEnJeu: any[] = [];
 
       for (let i = 0; i < 4; i++) {
         let card = paquetMelange.pop();
@@ -133,8 +134,11 @@ export class GameController {
       createHandForAllPlayers(game.players, game, paquetMelange);
       await DI.em.persistAndFlush(game);
 
-
+      const cartes: Card[] = [];
+      let nbJoueursConnectes: number = 0;
       io.on("connection", (socket) => {
+        nbJoueursConnectes++;
+        console.log(nbJoueursConnectes);
 
         // Écoutez la demande de la main
         socket.on("request_main", () => {
@@ -145,7 +149,11 @@ export class GameController {
 
         socket.on("sendCard", (data) => {
           console.log({ CardSent: data });
+          cartes.push(data);
+          if (cartes.length == nbJoueursConnectes) {
+            console.log(Jboeuf(game, miseEnJeu, cartes));
 
+          }
         })
 
         socket.on("updateHand", async (data) => {
@@ -156,11 +164,8 @@ export class GameController {
 
             for (const hand of game.gameHands) {
               if (hand.owner?._id && userEntity?._id && hand.owner._id.equals(userEntity._id)) {
-                console.log("Les cartes avant  : ", hand.cards);
                 hand.cards = data.hand.cards;
-                console.log("Les cartes après  : ", hand.cards);
                 await DI.em.persistAndFlush(game);  // Utilisez persist au lieu de persistAndFlush pour éviter la modification de la structure
-                console.log("GAMEHANDS", game.gameHands);
                 console.log("HAND", hand);
                 // Vous pouvez utiliser flush à la fin pour appliquer les modifications à la base de données
                 // await DI.em.flush();
