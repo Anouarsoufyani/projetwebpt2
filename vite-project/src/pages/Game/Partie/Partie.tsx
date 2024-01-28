@@ -14,6 +14,10 @@ const Partie: React.FC = () => {
     const [miseEnJeu, setMiseEnJeu] = useState<any>();
     const [nbJoueurs, setNbJoueurs] = useState<any>();
     const [generated, setGenerated] = useState<any>(false);
+    const [choisi, setChoisi] = useState<any>(false);
+    const [fini, setFini] = useState<any>(false);
+    const [choixLigne, setChoixLigne] = useState<any>(false);
+    const [compteur, setCompteur] = useState<any>(false);
 
 
 
@@ -36,14 +40,37 @@ const Partie: React.FC = () => {
 
     });
 
+    useEffect(() => {
+        socket.on("doitChoisir", data => {
+            console.log(data);
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
 
+            if (data.id == user.id) {
+                setChoixLigne(true);
+                console.log(choixLigne);
 
+            }
 
-    socket.on("miseEnJeu", data => {
-        setMiseEnJeu(data);
-        console.log(miseEnJeu);
+        });
 
+        return () => {
+            socket.off('doitChoisir');
+        };
     })
+
+
+    useEffect(() => {
+        socket.on("miseEnJeu", data => {
+            setMiseEnJeu(data);
+            console.log(miseEnJeu);
+            setChoisi(false);
+
+        });
+
+        return () => {
+            socket.off('miseEnJeu');
+        };
+    }, [])
 
 
 
@@ -63,11 +90,17 @@ const Partie: React.FC = () => {
         socket.emit("request_main");
 
         const handleMainUpdate = (data: any) => {
-            console.log({ data: data });
 
-            console.log('Main reçue:', data.main[0].owner);
+            data.main.forEach(main => {
+                if (main.cards.length == 0) {
+                    setCompteur(compteur + 1)
+                    if (compteur == nbJoueurs) {
+                        setFini(true);
+                    }
+                }
+            });
+
             const mainUser = data.main.filter((item: any) => item.owner == userId)
-            console.log('Main currentUser : ', mainUser[0]);
 
             setMain(mainUser[0]);
         };
@@ -83,17 +116,14 @@ const Partie: React.FC = () => {
     useEffect(() => {
         if (main && generated) {
             const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
-
+            setChoisi(true);
 
             socket.emit("updateHand", { hand: main, userId: userId });
-            console.log({ updatedHand: main });
         }
         else if (main && main.cards.length > 0) {
             const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
 
-
             socket.emit("updateHand", { hand: main, userId: userId });
-            console.log({ updatedHand: main });
         }
 
 
@@ -101,18 +131,50 @@ const Partie: React.FC = () => {
 
     const submitCard = (card: any) => {
 
-        setGenerated(true);
-        console.log({ card: card });
+        if (!choisi && !choixLigne) {
+            setGenerated(true);
+            console.log({ card: card });
 
-        socket.emit('sendCard', { card });
+            socket.emit('sendCard', { card });
 
-        setMain((prevMain: any) => {
-            // Filtrer la carte du tableau des cartes
-            const updatedCards = prevMain.cards.filter((c: any) => c !== card);
 
-            // Retourner un nouvel objet "main" avec les cartes mises à jour
-            return { ...prevMain, cards: updatedCards };
-        });
+
+            setMain((prevMain: any) => {
+                // Filtrer la carte du tableau des cartes
+                const updatedCards = prevMain.cards.filter((c: any) => c !== card);
+
+                // Retourner un nouvel objet "main" avec les cartes mises à jour
+                return { ...prevMain, cards: updatedCards };
+            });
+        }
+    };
+
+    const submitLigne = (index: any) => {
+        if (choixLigne) {
+            console.log({ index: index });
+            socket.emit('choixLigne', index);
+            setChoixLigne(false);
+            console.log({ choixLigne: choixLigne });
+
+        }
+
+
+        // if (!choisi) {
+        //     setGenerated(true);
+        //     console.log({ card: card });
+
+        //     socket.emit('sendCard', { card });
+
+
+
+        //     setMain((prevMain: any) => {
+        //         // Filtrer la carte du tableau des cartes
+        //         const updatedCards = prevMain.cards.filter((c: any) => c !== card);
+
+        //         // Retourner un nouvel objet "main" avec les cartes mises à jour
+        //         return { ...prevMain, cards: updatedCards };
+        //     });
+        // }
     };
 
 
@@ -123,36 +185,52 @@ const Partie: React.FC = () => {
     return (
         <>
             <section id="game_container">
-                <span>Nombre de joueurs : {nbJoueurs}</span>
-                <div className="game">
-                    <div className="cartesPosees"></div>
-                    {/* JEU */}
-                    <div id='miseEnJeu'>
-                        {miseEnJeu ? (miseEnJeu.map((liste: any, index: any) => (
-                            <div key={index} className="listes">
-                                {liste.map((carte: any, carteIndex: any) => (
-                                    <div key={carteIndex} className="card">
-                                        <img className="images" src={`/cards/${carte.identifiant}.svg`} alt={`Card ${carte.identifiant}`} />
+                {fini ? (
+                    <>
+                        <span>La partie est finie</span>
+                        <p>Le gagnant est : </p>
+                    </>
+                ) : (
+                    <>
+                        <div className="game">
+                            <div className="cartesPosees"></div>
+                            {/* JEU */}
+                            <div id='miseEnJeu'>
+                                {miseEnJeu ? (miseEnJeu.map((liste: any, index: any) => (
+                                    <div key={index} className="listes" onClick={() => submitLigne(index)}>
+                                        {liste.map((carte: any, carteIndex: any) => (
+                                            <div key={carteIndex} className="card">
+                                                <img className="images" src={`/cards/${carte.identifiant}.svg`} alt={`Card ${carte.identifiant}`} />
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                ))) : (<span>pas de miseEnJeu</span>)}
                             </div>
-                        ))) : (<span>pas de miseEnJeu</span>)}
-                    </div>
 
-                </div>
-                {/* MAIN */}
-                <div className="hand_container">
-                    {main.cards.map((card: any, index: number) => (
-                        <div key={index} className="card cardInHand" onClick={() => submitCard(card)}>
-                            <img className="images" src={`/cards/${card.identifiant}.svg`} alt={`Card ${card.identifiant}`} />
+                            {choixLigne ? (
+                                <><span>Veuillez choisir une ligne</span></>
+                            ) : (
+                                <><span></span></>
+                            )}
+
                         </div>
-                    ))}
-                </div>
+                        {/* MAIN */}
+                        <div className="hand_container">
+                            {main.cards.map((card: any, index: number) => (
+                                <div key={index} className="card cardInHand" onClick={() => submitCard(card)}>
+                                    <img className="images" src={`/cards/${card.identifiant}.svg`} alt={`Card ${card.identifiant}`} />
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
 
 
             </section>
             {/* CHAT */}
             <section id="chat">
+                <span>Nombre de joueurs : {nbJoueurs}</span>
+
                 <div id='messages'>
                     {messages.map((messageData, index) => (
                         <p key={index} className={messageData.username === JSON.parse(localStorage.getItem('user') || '{}').username ? 'own-message' : ''}>

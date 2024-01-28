@@ -363,7 +363,7 @@ export const chooseCard = (card: Card, miseEnjeu: Card[]) => {
 
 
 
-const trie = (cards: Card[]) => {
+export const trie = (cards: Card[]) => {
     cards.sort((a, b) => {
         let cardA = a; // Première carte de la sous-liste a
         let cardB = b; // Première carte de la sous-liste b
@@ -384,7 +384,7 @@ const trie = (cards: Card[]) => {
 
 // }
 
-function minEcart(ecart1: number, ecart2: number, ecart3: number, ecart4: number): number | null {
+export function minEcart(ecart1: number, ecart2: number, ecart3: number, ecart4: number): number | null {
     const ecarts: number[] = [ecart1, ecart2, ecart3, ecart4];
     const ecartsPositifs: number[] = ecarts.filter(ecart => ecart >= 0);
 
@@ -399,17 +399,6 @@ function minEcart(ecart1: number, ecart2: number, ecart3: number, ecart4: number
 
 
 export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) => {
-
-
-    // for (let i = 0; i < game.players.length; i++) {// io.on()
-    // let j = Math.floor(Math.random() * 101);
-    // chooseCard({
-    // identifiant: j,
-    // isUsable: true,
-    // user: game.players[i],
-    // nbBoeuf: 3
-    // }, cartes);
-    // }
     while (cartes.length > 0) {
 
         //des que l utilisateur a envoyer une carte la mettre dans la liste cartes 
@@ -419,7 +408,6 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
 
         trie(cartes);
         for (let i = 0; i < miseEnJeu.length; i++) {
-
 
             let ecartL1 = cartes[0].identifiant - miseEnJeu[0][miseEnJeu[0].length - 1].identifiant
             let ecartL2 = cartes[0].identifiant - miseEnJeu[1][miseEnJeu[1].length - 1].identifiant
@@ -442,7 +430,7 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
 
                             if (user && user.score) {
                                 user.score += miseEnJeu[i][m].nbBoeuf;
-                                await DI.em.persistAndFlush(game);
+                                await DI.em.persistAndFlush(user);
                                 miseEnJeu[i].pop()
                             }
 
@@ -463,11 +451,30 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
 
             // carte inferieur a la ligne correspondante
             else if (ecartL1 < 0 && ecartL2 < 0 && ecartL3 < 0 && ecartL4 < 0) {//envoie d un socket pour avertir l utilisateur qu il doit rentrer une ligne a prendre parmi les 4(input)
-                let id = 0; //recupere l id de la ligne qu il veut prendre entre la 1ere ligne et la 4eme
-                // io.emit("doitChoisir", "veuillez choisir une ligne");
-                // io.on("choixLigne", data => {
-                //     id = data;
-                // })
+                io.emit("doitChoisir", cartes[0].user);
+                let id = 0;
+
+                io.on("choixLigne", async data => {
+                    for (let m = miseEnJeu[data].length - 1; m >= 0; m--) {
+                        if (cartes[0].user != undefined) {
+                            const user = await DI.userRepository.findOne({
+                                _id: cartes[0].user?._id
+                            })
+                            if (user && user.score) {
+                                user.score += miseEnJeu[data][m].nbBoeuf;
+                                await DI.em.persistAndFlush(user);
+                            }
+                        }
+                        miseEnJeu[data].pop()
+                    }
+
+                    miseEnJeu[data].push(cartes[0]);
+                    cartes.splice(0, 1);
+                    i++;
+                    io.emit("miseEnJeu", miseEnJeu);
+
+                    console.log("MJ fin b", miseEnJeu);
+                });
 
                 for (let m = miseEnJeu[id].length - 1; m >= 0; m--) {
                     if (cartes[0].user != undefined) {
@@ -476,7 +483,7 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
                         })
                         if (user && user.score) {
                             user.score += miseEnJeu[id][m].nbBoeuf;
-                            await DI.em.persistAndFlush(game);
+                            await DI.em.persistAndFlush(user);
                         }
                     }
                     miseEnJeu[id].pop()
@@ -488,7 +495,14 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
                 io.emit("miseEnJeu", miseEnJeu);
 
                 console.log("MJ fin b", miseEnJeu);
+
+
+
+
+
                 break;
+
+
             }
 
         }

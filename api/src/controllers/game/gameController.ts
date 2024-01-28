@@ -195,7 +195,6 @@ export class GameController {
               if (hand.owner?._id && userEntity?._id && hand.owner._id.equals(userEntity._id)) {
                 hand.cards = data.hand.cards;
                 await DI.em.persistAndFlush(game);  // Utilisez persist au lieu de persistAndFlush pour éviter la modification de la structure
-                console.log("HAND", hand);
                 // Vous pouvez utiliser flush à la fin pour appliquer les modifications à la base de données
                 // await DI.em.flush();
               }
