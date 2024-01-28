@@ -1,3 +1,4 @@
+import { ObjectId } from "@mikro-orm/mongodb";
 import { DI, io } from "../app";
 import { Game, Hand, User } from "../entities";
 // import { GameStatus } from "../entities/GameStatus";
@@ -387,53 +388,41 @@ export const trie = (cards: Card[]) => {
 export function minEcart(ecart1: number, ecart2: number, ecart3: number, ecart4: number): number | null {
     const ecarts: number[] = [ecart1, ecart2, ecart3, ecart4];
     const ecartsPositifs: number[] = ecarts.filter(ecart => ecart >= 0);
-
     if (ecartsPositifs.length === 0) {
         return null; // Aucun écart positif trouvé
     }
-
     return Math.min(...ecartsPositifs);
 }
 
 
 
 
-export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) => {
+export const Jboeuf = async (miseEnJeu: Card[][], cartes: any[], userid: any) => {
     while (cartes.length > 0) {
-
         //des que l utilisateur a envoyer une carte la mettre dans la liste cartes 
-
-        console.log("MJ debut b", miseEnJeu);
-
-
         trie(cartes);
         for (let i = 0; i < miseEnJeu.length; i++) {
-
             let ecartL1 = cartes[0].identifiant - miseEnJeu[0][miseEnJeu[0].length - 1].identifiant
             let ecartL2 = cartes[0].identifiant - miseEnJeu[1][miseEnJeu[1].length - 1].identifiant
             let ecartL3 = cartes[0].identifiant - miseEnJeu[2][miseEnJeu[2].length - 1].identifiant
             let ecartL4 = cartes[0].identifiant - miseEnJeu[3][miseEnJeu[3].length - 1].identifiant
-
             let ecartid = cartes[0].identifiant - miseEnJeu[i][miseEnJeu[i].length - 1].identifiant
 
             //traite les cas de la carte qui est place entre la 1ere et la 3eme ligne carte comprise dans l'intervalle 
 
-
             if ((miseEnJeu[i][miseEnJeu[i].length - 1].identifiant < cartes[0].identifiant) && (ecartid) == (minEcart(ecartL1, ecartL2, ecartL3, ecartL4))) {
-
                 if (miseEnJeu[i].length == 5) {
                     for (let m = miseEnJeu[i].length - 1; m >= 0; m--) {
                         if (cartes[0].user != undefined) {
-                            const user = await DI.userRepository.findOne({
-                                _id: cartes[0].user?._id
-                            })
-
-                            if (user && user.score) {
-                                user.score += miseEnJeu[i][m].nbBoeuf;
-                                await DI.em.persistAndFlush(user);
-                                miseEnJeu[i].pop()
+                            const userEntity = await DI.userRepository.findOne({
+                                _id: new ObjectId(userid)
+                            });
+                            if (userEntity) {
+                                userEntity.score += miseEnJeu[i][m].nbBoeuf;
+                                await DI.em.persistAndFlush(userEntity);
+                                io.emit("afficheScore", { score: userEntity.score, userId: userid })
                             }
-
+                            miseEnJeu[i].pop()
                         }
                     }
                 }
@@ -441,8 +430,6 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
                 cartes.splice(0, 1);
                 i++;
                 io.emit("miseEnJeu", miseEnJeu);
-
-                console.log("MJ fin b", miseEnJeu);
                 break;
             }
 
@@ -453,82 +440,50 @@ export const Jboeuf = async (game: Game, miseEnJeu: Card[][], cartes: Card[]) =>
             else if (ecartL1 < 0 && ecartL2 < 0 && ecartL3 < 0 && ecartL4 < 0) {//envoie d un socket pour avertir l utilisateur qu il doit rentrer une ligne a prendre parmi les 4(input)
                 io.emit("doitChoisir", cartes[0].user);
                 let id = 0;
-
                 io.on("choixLigne", async data => {
                     for (let m = miseEnJeu[data].length - 1; m >= 0; m--) {
                         if (cartes[0].user != undefined) {
-                            const user = await DI.userRepository.findOne({
-                                _id: cartes[0].user?._id
-                            })
-                            if (user && user.score) {
-                                user.score += miseEnJeu[data][m].nbBoeuf;
-                                await DI.em.persistAndFlush(user);
+                            const userEntity = await DI.userRepository.findOne({
+                                _id: new ObjectId(userid)
+                            });
+                            if (userEntity) {
+                                userEntity.score += miseEnJeu[i][m].nbBoeuf;
+                                await DI.em.persistAndFlush(userEntity);
+                                io.emit("afficheScore", { score: userEntity.score, userId: userEntity._id })
                             }
+                            miseEnJeu[i].pop()
                         }
-                        miseEnJeu[data].pop()
                     }
-
                     miseEnJeu[data].push(cartes[0]);
                     cartes.splice(0, 1);
                     i++;
                     io.emit("miseEnJeu", miseEnJeu);
-
-                    console.log("MJ fin b", miseEnJeu);
                 });
 
                 for (let m = miseEnJeu[id].length - 1; m >= 0; m--) {
                     if (cartes[0].user != undefined) {
-                        const user = await DI.userRepository.findOne({
-                            _id: cartes[0].user?._id
-                        })
-                        if (user && user.score) {
-                            user.score += miseEnJeu[id][m].nbBoeuf;
-                            await DI.em.persistAndFlush(user);
-                        }
-                    }
-                    miseEnJeu[id].pop()
-                }
+                        console.log("BABABABABA", cartes[0].user.id);
 
+                        const userEntity = await DI.userRepository.findOne({
+                            _id: cartes[0].user.id
+                        });
+
+                        console.log({ userEntity: userEntity });
+
+                        if (userEntity) {
+                            userEntity.score += miseEnJeu[id][m].nbBoeuf;
+                            await DI.em.persistAndFlush(userEntity);
+                            io.emit("afficheScore", { score: userEntity.score, userId: cartes[0].user.id })
+                        }
+                        miseEnJeu[id].pop()
+                    }
+                }
                 miseEnJeu[id].push(cartes[0]);
                 cartes.splice(0, 1);
                 i++;
                 io.emit("miseEnJeu", miseEnJeu);
-
-                console.log("MJ fin b", miseEnJeu);
-
-
-
-
-
                 break;
-
-
             }
-
-        }
-
-
-    }
-
-    let min = game.players[0]
-
-    for (let i = 1; i < game.players.length; i++) {
-        if (game.players[i].score < min.score) {
-            min = game.players[i]
         }
     }
-
-    return min;
-
-    // [ { identifiant: 0, isUsable: true, user: undefined, nbBoeuf: 2 } ],
-    // [ { identifiant: 15, isUsable: true, user: undefined, nbBoeuf: 2 } , {}],
-    // [ { identifiant: 30, isUsable: true, user: undefined, nbBoeuf: 3 } ],
-    // [ { identifiant: 70, isUsable: true, user: undefined, nbBoeuf: 3 } ]
-
-    // id carte = 25 
-
-    //if(user.score>66){
-    //break
-    //}
-
 }

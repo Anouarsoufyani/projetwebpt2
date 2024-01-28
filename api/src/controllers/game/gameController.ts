@@ -127,6 +127,22 @@ export class GameController {
       code: req.body.gameCode
     })
 
+    if (game) {
+      for (const player of game?.players) {
+        const userEntity = await DI.userRepository.findOne({
+          _id: player._id
+        })
+
+        if (userEntity) {
+          userEntity.score = 0;
+          await DI.em.persistAndFlush(userEntity);
+          await DI.em.persistAndFlush(game);
+          console.log(userEntity.score);
+
+        }
+      }
+    }
+
     if (game && game?.owner?._id === currentUser._id && game.players.length >= 2 && game.players.length <= 10) {
       game.status = GameStatus.STARTED;
 
@@ -170,19 +186,67 @@ export class GameController {
         // Écoutez la demande de la main
         socket.on("request_main", () => {
           // Émettez la main uniquement en réponse à la demand
-
           socket.emit("main", { main: game.gameHands });
         });
 
         io.emit("miseEnJeu", miseEnJeu);
 
         socket.on("sendCard", (data) => {
-          console.log({ CardSent: data });
           cartes.push(data.card);
           if (cartes.length == nbJoueursConnectes) {
-            console.log(Jboeuf(game, miseEnJeu, cartes));
+            Jboeuf(miseEnJeu, cartes, data.userId);
             io.emit("miseEnJeu", miseEnJeu);
           }
+        })
+
+        socket.on("finDeGame", async () => {
+          let min = 10000;
+          let winner;
+          for (const player of game.players) {
+            const userEntity = await DI.userRepository.findOne({
+              _id: new ObjectId(player._id)
+            });
+            if (userEntity && userEntity.score < min) {
+              min = userEntity.score;
+              winner = userEntity;
+            }
+          }
+          io.emit("CestFini", winner?.username);
+        })
+
+        socket.once("generateNewPack", async (data) => {
+          console.log("RENTRE DANS generateNewPack");
+
+          const user = await DI.userRepository.findOne({
+            _id: new ObjectId(data)
+          })
+
+          if (user) {
+            try {
+              for (const hand of game.gameHands) {
+
+                if (hand.owner?._id && user?._id && hand.owner._id.equals(user._id) && paquetMelange.length > 10) {
+
+                  for (let i = 0; i < 10; i++) {
+
+                    let card = paquetMelange.pop();
+                    if (card) {
+                      card.user = hand.owner;
+                      hand.cards.push(card);
+                    }
+                  }
+                  await DI.em.persistAndFlush(game);
+                }
+              }
+            } catch (error) {
+              console.error("Erreur lors de la mise à jour de la main");
+            }
+            socket.emit("main", { main: game.gameHands });
+
+          }
+
+
+
         })
 
         socket.on("updateHand", async (data) => {
@@ -194,9 +258,7 @@ export class GameController {
             for (const hand of game.gameHands) {
               if (hand.owner?._id && userEntity?._id && hand.owner._id.equals(userEntity._id)) {
                 hand.cards = data.hand.cards;
-                await DI.em.persistAndFlush(game);  // Utilisez persist au lieu de persistAndFlush pour éviter la modification de la structure
-                // Vous pouvez utiliser flush à la fin pour appliquer les modifications à la base de données
-                // await DI.em.flush();
+                await DI.em.persistAndFlush(game);
               }
             }
           } catch (error) {

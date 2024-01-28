@@ -17,7 +17,9 @@ const Partie: React.FC = () => {
     const [choisi, setChoisi] = useState<any>(false);
     const [fini, setFini] = useState<any>(false);
     const [choixLigne, setChoixLigne] = useState<any>(false);
-    const [compteur, setCompteur] = useState<any>(false);
+    const [compteur, setCompteur] = useState<number>(0);
+    const [score, setScore] = useState<any>();
+    const [winner, setWinner] = useState<any>();
 
 
 
@@ -36,7 +38,7 @@ const Partie: React.FC = () => {
 
     socket.on("nbJoueurs", data => {
         setNbJoueurs(data);
-        console.log(data);
+        console.log({ nbJoueurs: data });
 
     });
 
@@ -62,9 +64,7 @@ const Partie: React.FC = () => {
     useEffect(() => {
         socket.on("miseEnJeu", data => {
             setMiseEnJeu(data);
-            console.log(miseEnJeu);
             setChoisi(false);
-
         });
 
         return () => {
@@ -91,14 +91,31 @@ const Partie: React.FC = () => {
 
         const handleMainUpdate = (data: any) => {
 
+            // data.main.forEach(main => {
+            //     if (main.cards.length == 0) {
+            //         socket.emit("generateNewPack", userId)
+            //         setCompteur(compteur + 1);
+            //         console.log(compteur);
+            //     } else {
+            //         setCompteur(0);
+            //     }
+            // });
+
             data.main.forEach(main => {
-                if (main.cards.length == 0) {
-                    setCompteur(compteur + 1)
-                    if (compteur == nbJoueurs) {
-                        setFini(true);
-                    }
+                if (main.cards.length == 0 && main.owner == userId) {
+                    socket.emit("generateNewPack", userId)
+                    setCompteur(compteur + 1);
+                    console.log(compteur);
+                } else {
+                    setCompteur(0);
                 }
             });
+
+            if (compteur != 0) {
+                // setFini(true);
+                socket.emit("generateNewPack", userId)
+                window.location.reload();
+            }
 
             const mainUser = data.main.filter((item: any) => item.owner == userId)
 
@@ -111,6 +128,35 @@ const Partie: React.FC = () => {
             socket.off('main', handleMainUpdate);
         };
     }, []);
+
+
+    useEffect(() => {
+        socket.on("CestFini", data => {
+            setFini(true);
+            setWinner(data);
+            console.log({ winner: data });
+
+        })
+    })
+
+    useEffect(() => {
+        const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
+
+        socket.on("afficheScore", data => {
+            if (data.userId == userId) {
+                setScore(data.score);
+                console.log({ score: data.score });
+
+                if (score >= 30) {
+                    socket.emit("finDeGame");
+                }
+            }
+        })
+    })
+
+    if (score >= 30) {
+        socket.emit("finDeGame");
+    }
 
     // Utilisez un autre useEffect pour observer les changements dans `main` et émettre l'événement 'updateHand'
     useEffect(() => {
@@ -130,12 +176,13 @@ const Partie: React.FC = () => {
     }, [main]);
 
     const submitCard = (card: any) => {
+        const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
 
         if (!choisi && !choixLigne) {
             setGenerated(true);
             console.log({ card: card });
 
-            socket.emit('sendCard', { card });
+            socket.emit('sendCard', { card: card, userId: userId });
 
 
 
@@ -157,26 +204,12 @@ const Partie: React.FC = () => {
             console.log({ choixLigne: choixLigne });
 
         }
-
-
-        // if (!choisi) {
-        //     setGenerated(true);
-        //     console.log({ card: card });
-
-        //     socket.emit('sendCard', { card });
-
-
-
-        //     setMain((prevMain: any) => {
-        //         // Filtrer la carte du tableau des cartes
-        //         const updatedCards = prevMain.cards.filter((c: any) => c !== card);
-
-        //         // Retourner un nouvel objet "main" avec les cartes mises à jour
-        //         return { ...prevMain, cards: updatedCards };
-        //     });
-        // }
     };
 
+    const reloadPage = () => {
+        setCompteur(0);
+        window.location.reload();
+    }
 
 
 
@@ -188,11 +221,28 @@ const Partie: React.FC = () => {
                 {fini ? (
                     <>
                         <span>La partie est finie</span>
-                        <p>Le gagnant est : </p>
+                        <p>Le gagnant est : {JSON.stringify(winner)}</p>
                     </>
                 ) : (
                     <>
                         <div className="game">
+                            <span>Votre score : {score}</span>
+                            {choixLigne ? (
+                                <><div><span>Veuillez choisir une ligne</span></div></>
+                            ) : (
+                                <><span></span></>
+                            )}
+
+                            {compteur != 0 ? (
+                                <>
+                                    <button onClick={reloadPage}>
+                                        Redistribuer des cartes
+                                    </button>
+                                </>
+
+                            ) : (
+                                <></>
+                            )}
                             <div className="cartesPosees"></div>
                             {/* JEU */}
                             <div id='miseEnJeu'>
@@ -207,11 +257,7 @@ const Partie: React.FC = () => {
                                 ))) : (<span>pas de miseEnJeu</span>)}
                             </div>
 
-                            {choixLigne ? (
-                                <><span>Veuillez choisir une ligne</span></>
-                            ) : (
-                                <><span></span></>
-                            )}
+
 
                         </div>
                         {/* MAIN */}
